@@ -33,7 +33,7 @@ const bannerSlides = [
     title: '达人接单平台',
     subtitle: '每日更新 1000+ 任务',
     highlight: '最高佣金 ¥5,000',
-    btnText: '立即接单',
+    btnText: '立即报名',
     bg: 'https://mgx-backend-cdn.metadl.com/generate/images/1020241/2026-03-12/e4b2f418-4635-4a7f-9a49-be4523acca37.png',
   },
   {
