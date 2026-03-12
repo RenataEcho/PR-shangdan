@@ -237,5 +237,7 @@ export const userProfile = {
   completedOrders: 15,
   totalEarnings: 5680,
   todayEarnings: 560,
+  mediaAccounts: 3,
+  daysJoined: 180,
   phone: '138****8888',
 };

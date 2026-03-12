@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
 import {
   ChevronRight,
-  Star,
   Settings,
   HelpCircle,
   LogOut,
@@ -12,32 +10,8 @@ import BottomNav from '@/components/BottomNav';
 import { userProfile } from '@/lib/mockData';
 import { toast } from 'sonner';
 
-function AnimatedEarning({ value }: { value: number }) {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    const duration = 1200;
-    const startTime = Date.now();
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.floor(eased * value));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    animate();
-  }, [value]);
-
-  return (
-    <span style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
-      ¥{display.toLocaleString()}
-    </span>
-  );
-}
-
 export default function Profile() {
   const menuItems = [
-    { icon: Star, label: '我的收藏', desc: '收藏的商单', color: 'text-amber-500', bgColor: 'bg-amber-50' },
     { icon: Bell, label: '消息通知', desc: '系统消息和通知', color: 'text-[#6C8CFF]', bgColor: 'bg-[#6C8CFF]/10' },
     { icon: Shield, label: '账号安全', desc: '密码和绑定设置', color: 'text-[#16C784]', bgColor: 'bg-[#16C784]/10' },
     { icon: HelpCircle, label: '帮助中心', desc: '常见问题解答', color: 'text-purple-500', bgColor: 'bg-purple-50' },
@@ -77,16 +51,16 @@ export default function Profile() {
             <p className="text-[10px] text-gray-400 mt-0.5">已完成商单</p>
           </div>
           <div className="text-center border-x border-[#E6EAF2]">
-            <p className="text-xl font-bold text-[#16C784]">
-              <AnimatedEarning value={userProfile.totalEarnings} />
+            <p className="text-xl font-bold text-[#2F6BFF]" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+              {userProfile.mediaAccounts}
             </p>
-            <p className="text-[10px] text-gray-400 mt-0.5">累计收益</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">媒体账号</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold text-[#16C784]">
-              <AnimatedEarning value={userProfile.todayEarnings} />
+            <p className="text-xl font-bold text-[#2F6BFF]" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+              {userProfile.daysJoined}
             </p>
-            <p className="text-[10px] text-gray-400 mt-0.5">今日收益</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">加入平台</p>
           </div>
         </div>
       </div>
