@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -11,10 +11,13 @@ import {
   ShieldCheck,
   Check,
   X,
+  Lock,
+  Delete,
 } from 'lucide-react';
 import { walletInfo } from '@/lib/mockData';
+import { toast } from 'sonner';
 
-type Step = 'input' | 'confirm' | 'success';
+type Step = 'input' | 'password' | 'confirm' | 'success';
 
 interface Account {
   id: string;
@@ -53,11 +56,15 @@ const FEE_RATE = 0.006;
 const MIN_WITHDRAW = 10;
 const MAX_WITHDRAW_DAILY = 5000;
 const MIN_FEE = 0.1;
+const CORRECT_PASSWORD = '123456'; // Mock password
+const MAX_ATTEMPTS = 5;
 
 function calcFee(amount: number) {
   const fee = Math.max(amount * FEE_RATE, MIN_FEE);
   return Math.round(fee * 100) / 100;
 }
+
+const numpadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'delete'] as const;
 
 export default function Withdraw() {
   const navigate = useNavigate();
@@ -66,6 +73,14 @@ export default function Withdraw() {
   const [amountStr, setAmountStr] = useState('');
   const [error, setError] = useState('');
   const [showAccountPicker, setShowAccountPicker] = useState(false);
+
+  // Password state
+  const [password, setPassword] = useState('');
+  const [pwdError, setPwdError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [shaking, setShaking] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const balance = walletInfo.balance;
   const amount = parseFloat(amountStr) || 0;
@@ -79,6 +94,13 @@ export default function Withdraw() {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
+  // Cleanup lock timer
+  useEffect(() => {
+    return () => {
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    };
   }, []);
 
   const handleAmountChange = (val: string) => {
@@ -122,16 +144,85 @@ export default function Withdraw() {
       setError(`单日提现上限为 ¥${MAX_WITHDRAW_DAILY.toLocaleString()}`);
       return;
     }
-    setStep('confirm');
+    // Go to password step
+    setPassword('');
+    setPwdError('');
+    setStep('password');
   };
+
+  const handlePasswordInput = useCallback((key: string) => {
+    if (locked) return;
+    setPwdError('');
+
+    if (key === 'delete') {
+      setPassword((prev) => prev.slice(0, -1));
+      return;
+    }
+
+    setPassword((prev) => {
+      if (prev.length >= 6) return prev;
+      const newPwd = prev + key;
+
+      // Auto-verify when 6 digits entered
+      if (newPwd.length === 6) {
+        setTimeout(() => {
+          if (newPwd === CORRECT_PASSWORD) {
+            setStep('confirm');
+            setPassword('');
+            setAttempts(0);
+          } else {
+            const newAttempts = attempts + 1;
+            setAttempts(newAttempts);
+            setShaking(true);
+            setTimeout(() => setShaking(false), 500);
+
+            if (newAttempts >= MAX_ATTEMPTS) {
+              setLocked(true);
+              setPwdError('错误次数过多，请30秒后重试');
+              lockTimerRef.current = setTimeout(() => {
+                setLocked(false);
+                setAttempts(0);
+                setPwdError('');
+              }, 30000);
+            } else {
+              setPwdError(`密码错误，还可尝试 ${MAX_ATTEMPTS - newAttempts} 次`);
+            }
+            setPassword('');
+          }
+        }, 150);
+      }
+
+      return newPwd;
+    });
+  }, [locked, attempts]);
 
   const handleConfirm = () => {
     setStep('success');
   };
 
   const goBack = () => {
-    if (step === 'confirm') setStep('input');
-    else navigate(-1);
+    if (step === 'password') {
+      setPassword('');
+      setPwdError('');
+      setStep('input');
+    } else if (step === 'confirm') {
+      setStep('input');
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    toast.info('请联系客服重置支付密码', {
+      description: '客服热线：400-888-8888',
+    });
+  };
+
+  const stepTitle: Record<Step, string> = {
+    input: '输入提现金额',
+    password: '验证支付密码',
+    confirm: '确认提现',
+    success: '提现成功',
   };
 
   return (
@@ -148,9 +239,7 @@ export default function Withdraw() {
           >
             <ArrowLeft className="w-4 h-4 text-white" />
           </button>
-          <h1 className="text-white font-bold text-base">
-            {step === 'input' ? '输入提现金额' : '确认提现'}
-          </h1>
+          <h1 className="text-white font-bold text-base">{stepTitle[step]}</h1>
         </div>
       )}
 
@@ -283,6 +372,104 @@ export default function Withdraw() {
         </div>
       )}
 
+      {/* Step: Password Verification */}
+      {step === 'password' && (
+        <div className="flex flex-col min-h-[calc(100vh-52px)]">
+          {/* Top Section */}
+          <div className="flex-1 flex flex-col items-center pt-10 px-6">
+            {/* Lock Icon */}
+            <div className="w-16 h-16 rounded-full bg-[#2F6BFF]/10 flex items-center justify-center mb-4">
+              <Lock className="w-7 h-7 text-[#2F6BFF]" />
+            </div>
+
+            <h2 className="text-lg font-bold text-[#0F1B2D] mb-1">请输入支付密码</h2>
+            <p className="text-xs text-gray-400 mb-1">
+              提现金额
+              <span className="font-bold text-[#0F1B2D] ml-1" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+                ¥{amount.toFixed(2)}
+              </span>
+            </p>
+            <p className="text-[10px] text-gray-300 mb-8">
+              到 {selectedAccount.name} {selectedAccount.account}
+            </p>
+
+            {/* Password Dots */}
+            <div
+              className={`flex items-center gap-3 mb-4 transition-transform ${shaking ? 'animate-shake' : ''}`}
+            >
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${
+                    i < password.length
+                      ? 'border-[#2F6BFF] bg-[#2F6BFF]/5'
+                      : i === password.length
+                        ? 'border-[#2F6BFF]/40 bg-white'
+                        : 'border-[#E6EAF2] bg-white'
+                  }`}
+                >
+                  {i < password.length && (
+                    <div className="w-3 h-3 rounded-full bg-[#0F1B2D]" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Error Message */}
+            <div className="h-6 flex items-center">
+              {pwdError && (
+                <div className="flex items-center gap-1.5 text-red-500">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <p className="text-xs">{pwdError}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Forgot Password */}
+            <button
+              onClick={handleForgotPassword}
+              className="mt-2 text-xs text-[#2F6BFF] font-medium active:opacity-70 transition-opacity"
+            >
+              忘记密码？
+            </button>
+          </div>
+
+          {/* Number Pad */}
+          <div className="bg-[#E8ECF2] p-1.5 pb-6">
+            <div className="grid grid-cols-3 gap-1.5">
+              {numpadKeys.map((key, idx) => {
+                if (key === '') {
+                  return <div key={idx} className="h-14" />;
+                }
+                if (key === 'delete') {
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handlePasswordInput('delete')}
+                      disabled={locked}
+                      className="h-14 rounded-xl bg-[#D1D5DB] flex items-center justify-center active:bg-[#B8BCC4] transition-colors disabled:opacity-40"
+                    >
+                      <Delete className="w-5 h-5 text-[#0F1B2D]" />
+                    </button>
+                  );
+                }
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handlePasswordInput(key)}
+                    disabled={locked}
+                    className="h-14 rounded-xl bg-white flex items-center justify-center active:bg-gray-100 transition-colors disabled:opacity-40"
+                    style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+                  >
+                    <span className="text-xl font-semibold text-[#0F1B2D]">{key}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Step: Confirm */}
       {step === 'confirm' && (
         <div className="px-4 pt-4 space-y-4">
@@ -320,6 +507,13 @@ export default function Withdraw() {
                   {selectedAccount.type === 'alipay' ? '即时到账' : '1-3个工作日'}
                 </span>
               </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">身份验证</span>
+                <div className="flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16C784]" />
+                  <span className="text-xs font-medium text-[#16C784]">已验证</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -327,7 +521,7 @@ export default function Withdraw() {
             <ShieldCheck className="w-4 h-4 text-[#2F6BFF] mt-0.5 shrink-0" />
             <div className="text-xs text-[#2F6BFF]/80 space-y-0.5">
               <p className="font-medium text-[#2F6BFF]">安全提示</p>
-              <p>请确认提现账户信息无误，提现发起后无法撤回</p>
+              <p>支付密码已验证通过，请确认提现信息无误后提交</p>
             </div>
           </div>
 
@@ -401,12 +595,10 @@ export default function Withdraw() {
       {/* Account Picker Overlay */}
       {showAccountPicker && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ maxWidth: '480px', margin: '0 auto' }}>
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setShowAccountPicker(false)}
           />
-          {/* Sheet */}
           <div className="relative w-full bg-white rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-[#0F1B2D]">选择提现账户</h3>
@@ -466,6 +658,18 @@ export default function Withdraw() {
           </div>
         </div>
       )}
+
+      {/* Shake animation style */}
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }
