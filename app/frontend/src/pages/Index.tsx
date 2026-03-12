@@ -232,12 +232,7 @@ export default function Index() {
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <Search className="w-10 h-10 mb-3 opacity-20" />
               <p className="text-sm">暂无匹配的任务</p>
-              <button
-                onClick={() => { setActiveCategory('全部'); setSearchQuery(''); }}
-                className="mt-2 text-xs text-[#2F6BFF] font-medium"
-              >
-                查看全部任务
-              </button>
+              
             </div>
           )}
         </div>
