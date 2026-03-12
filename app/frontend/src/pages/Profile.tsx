@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import {
   ChevronRight,
   Star,
-  FileCheck,
   Settings,
   HelpCircle,
   LogOut,
@@ -38,7 +37,6 @@ function AnimatedEarning({ value }: { value: number }) {
 
 export default function Profile() {
   const menuItems = [
-    { icon: FileCheck, label: '我的商单', desc: '查看已报名商单', color: 'text-[#2F6BFF]', bgColor: 'bg-[#2F6BFF]/10' },
     { icon: Star, label: '我的收藏', desc: '收藏的商单', color: 'text-amber-500', bgColor: 'bg-amber-50' },
     { icon: Bell, label: '消息通知', desc: '系统消息和通知', color: 'text-[#6C8CFF]', bgColor: 'bg-[#6C8CFF]/10' },
     { icon: Shield, label: '账号安全', desc: '密码和绑定设置', color: 'text-[#16C784]', bgColor: 'bg-[#16C784]/10' },
