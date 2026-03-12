@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  ChevronRight,
+  ChevronDown,
   Smartphone,
   Building2,
   Info,
   ShieldCheck,
+  Check,
+  X,
 } from 'lucide-react';
 import { walletInfo } from '@/lib/mockData';
 
-type Step = 'select' | 'amount' | 'confirm' | 'success';
+type Step = 'input' | 'confirm' | 'success';
 
 interface Account {
   id: string;
@@ -59,24 +61,28 @@ function calcFee(amount: number) {
 
 export default function Withdraw() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>('select');
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [step, setStep] = useState<Step>('input');
+  const [selectedAccount, setSelectedAccount] = useState<Account>(accounts[0]);
   const [amountStr, setAmountStr] = useState('');
   const [error, setError] = useState('');
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
 
   const balance = walletInfo.balance;
   const amount = parseFloat(amountStr) || 0;
   const fee = calcFee(amount);
   const actualAmount = Math.round((amount - fee) * 100) / 100;
 
-  const handleSelectAccount = (account: Account) => {
-    setSelectedAccount(account);
-    setStep('amount');
-  };
+  // Close picker on escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowAccountPicker(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   const handleAmountChange = (val: string) => {
     setError('');
-    // Only allow numbers and one decimal point with up to 2 decimal places
     const cleaned = val.replace(/[^0-9.]/g, '');
     const parts = cleaned.split('.');
     if (parts.length > 2) return;
@@ -124,16 +130,8 @@ export default function Withdraw() {
   };
 
   const goBack = () => {
-    if (step === 'amount') setStep('select');
-    else if (step === 'confirm') setStep('amount');
+    if (step === 'confirm') setStep('input');
     else navigate(-1);
-  };
-
-  const stepTitle: Record<Step, string> = {
-    select: '选择提现账户',
-    amount: '输入提现金额',
-    confirm: '确认提现',
-    success: '提现成功',
   };
 
   return (
@@ -150,79 +148,34 @@ export default function Withdraw() {
           >
             <ArrowLeft className="w-4 h-4 text-white" />
           </button>
-          <h1 className="text-white font-bold text-base">{stepTitle[step]}</h1>
+          <h1 className="text-white font-bold text-base">
+            {step === 'input' ? '输入提现金额' : '确认提现'}
+          </h1>
         </div>
       )}
 
-      {/* Step: Select Account */}
-      {step === 'select' && (
-        <div className="px-4 pt-4 space-y-3">
-          {/* Balance Info */}
-          <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
-            <p className="text-xs text-gray-400 mb-1">可提现余额</p>
-            <p className="text-2xl font-bold text-[#0F1B2D]" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
-              ¥ {balance.toFixed(2)}
-            </p>
-          </div>
-
-          {/* Account List */}
-          <div>
-            <p className="text-xs text-gray-400 mb-2 px-1">请选择提现到以下账户</p>
-            <div className="space-y-2.5">
-              {accounts.map((acc) => {
-                const Icon = acc.icon;
-                return (
-                  <button
-                    key={acc.id}
-                    onClick={() => handleSelectAccount(acc)}
-                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-between active:scale-[0.99] transition-transform"
-                    style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl ${acc.bgColor} flex items-center justify-center`}>
-                        <Icon className={`w-5 h-5 ${acc.color}`} />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-semibold text-[#0F1B2D]">{acc.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{acc.account}</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300" />
-                  </button>
-                );
-              })}
+      {/* Step: Input (Account + Amount combined) */}
+      {step === 'input' && (
+        <div className="px-4 pt-4 pb-6 space-y-3">
+          {/* Account Selector */}
+          <button
+            onClick={() => setShowAccountPicker(true)}
+            className="w-full bg-white rounded-2xl p-4 flex items-center justify-between active:bg-gray-50 transition-colors"
+            style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl ${selectedAccount.bgColor} flex items-center justify-center`}>
+                <selectedAccount.icon className={`w-5 h-5 ${selectedAccount.color}`} />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-[#0F1B2D]">{selectedAccount.name}</p>
+                <p className="text-xs text-gray-400">{selectedAccount.account}</p>
+              </div>
             </div>
-          </div>
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          </button>
 
-          {/* Tips */}
-          <div className="bg-amber-50 rounded-2xl p-4 flex gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-            <Info className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-            <div className="text-xs text-amber-700 space-y-1">
-              <p className="font-medium">提现须知</p>
-              <p>• 最低提现金额 ¥{MIN_WITHDRAW}，单日上限 ¥{MAX_WITHDRAW_DAILY.toLocaleString()}</p>
-              <p>• 手续费率 {(FEE_RATE * 100).toFixed(1)}%，最低 ¥{MIN_FEE}</p>
-              <p>• 提现到账时间：支付宝即时到账，银行卡1-3个工作日</p>
-              <p>• 待结算金额不可提现，需等待结算完成</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Step: Enter Amount */}
-      {step === 'amount' && selectedAccount && (
-        <div className="px-4 pt-4 space-y-4">
-          {/* Selected Account */}
-          <div className="bg-white rounded-2xl p-4 flex items-center gap-3" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
-            <div className={`w-10 h-10 rounded-xl ${selectedAccount.bgColor} flex items-center justify-center`}>
-              <selectedAccount.icon className={`w-5 h-5 ${selectedAccount.color}`} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#0F1B2D]">{selectedAccount.name}</p>
-              <p className="text-xs text-gray-400">{selectedAccount.account}</p>
-            </div>
-          </div>
-
-          {/* Amount Input */}
+          {/* Amount Input Card */}
           <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-gray-400">提现金额</p>
@@ -253,7 +206,6 @@ export default function Withdraw() {
               )}
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-1.5 mt-3 text-red-500">
                 <AlertCircle className="w-3.5 h-3.5" />
@@ -332,9 +284,8 @@ export default function Withdraw() {
       )}
 
       {/* Step: Confirm */}
-      {step === 'confirm' && selectedAccount && (
+      {step === 'confirm' && (
         <div className="px-4 pt-4 space-y-4">
-          {/* Confirm Card */}
           <div className="bg-white rounded-2xl p-5" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
             <div className="text-center mb-5">
               <p className="text-xs text-gray-400 mb-1">提现金额</p>
@@ -372,7 +323,6 @@ export default function Withdraw() {
             </div>
           </div>
 
-          {/* Security Notice */}
           <div className="bg-[#F0F7FF] rounded-2xl p-4 flex gap-3">
             <ShieldCheck className="w-4 h-4 text-[#2F6BFF] mt-0.5 shrink-0" />
             <div className="text-xs text-[#2F6BFF]/80 space-y-0.5">
@@ -381,7 +331,6 @@ export default function Withdraw() {
             </div>
           </div>
 
-          {/* Confirm Button */}
           <button
             onClick={handleConfirm}
             className="w-full py-3.5 rounded-xl font-semibold text-sm text-white active:scale-[0.98] transition-transform"
@@ -391,7 +340,7 @@ export default function Withdraw() {
           </button>
 
           <button
-            onClick={() => setStep('amount')}
+            onClick={() => setStep('input')}
             className="w-full py-3 rounded-xl font-medium text-sm text-gray-400 active:bg-gray-50 transition-colors"
           >
             返回修改
@@ -400,7 +349,7 @@ export default function Withdraw() {
       )}
 
       {/* Step: Success */}
-      {step === 'success' && selectedAccount && (
+      {step === 'success' && (
         <div className="min-h-screen flex flex-col items-center justify-center px-6">
           <div className="w-20 h-20 rounded-full bg-[#16C784]/10 flex items-center justify-center mb-5">
             <CheckCircle2 className="w-10 h-10 text-[#16C784]" />
@@ -446,6 +395,75 @@ export default function Withdraw() {
           >
             查看提现记录
           </button>
+        </div>
+      )}
+
+      {/* Account Picker Overlay */}
+      {showAccountPicker && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ maxWidth: '480px', margin: '0 auto' }}>
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowAccountPicker(false)}
+          />
+          {/* Sheet */}
+          <div className="relative w-full bg-white rounded-t-3xl p-5 pb-8 animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-[#0F1B2D]">选择提现账户</h3>
+              <button
+                onClick={() => setShowAccountPicker(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {accounts.map((acc) => {
+                const Icon = acc.icon;
+                const isSelected = acc.id === selectedAccount.id;
+                return (
+                  <button
+                    key={acc.id}
+                    onClick={() => {
+                      setSelectedAccount(acc);
+                      setShowAccountPicker(false);
+                    }}
+                    className={`w-full rounded-2xl p-4 flex items-center justify-between transition-all active:scale-[0.99] ${
+                      isSelected
+                        ? 'bg-[#2F6BFF]/5 border-2 border-[#2F6BFF]'
+                        : 'bg-[#F5F8FF] border-2 border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl ${acc.bgColor} flex items-center justify-center`}>
+                        <Icon className={`w-5 h-5 ${acc.color}`} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-semibold text-[#0F1B2D]">{acc.name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{acc.account}</p>
+                        <p className="text-[10px] text-gray-300 mt-0.5">
+                          {acc.type === 'alipay' ? '即时到账' : '1-3个工作日到账'}
+                        </p>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div className="w-6 h-6 rounded-full bg-[#2F6BFF] flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 flex items-start gap-2 px-1">
+              <Info className="w-3.5 h-3.5 text-gray-300 mt-0.5 shrink-0" />
+              <p className="text-[10px] text-gray-400">
+                如需添加新账户，请前往「收款帐户」页面管理
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>
