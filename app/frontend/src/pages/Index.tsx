@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { Search, ChevronRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import OrderCard from '@/components/OrderCard';
 import { orders, categoryIcons, platformStats } from '@/lib/mockData';
@@ -132,7 +132,7 @@ function BannerCarousel() {
 
 export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('全部');
+  const [activeCategory, setActiveCategory] = useState<string>('App推广');
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -221,20 +221,8 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Order Feed - no tabs */}
+      {/* Order Feed */}
       <div className="px-4 mt-4" id="task-feed">
-        {activeCategory !== '全部' && (
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-[#0F1B2D]">{activeCategory}</span>
-            <button
-              onClick={() => setActiveCategory('全部')}
-              className="flex items-center gap-0.5 text-xs text-[#2F6BFF]"
-            >
-              查看全部 <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-
         <div className="space-y-3">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
