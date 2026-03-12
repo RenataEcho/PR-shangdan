@@ -1,10 +1,9 @@
-import { Home, ClipboardList, Wallet, User } from 'lucide-react';
+import { Home, ClipboardList, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const navItems = [
   { path: '/', label: '首页', icon: Home },
   { path: '/tasks', label: '任务中心', icon: ClipboardList },
-  { path: '/wallet', label: '钱包', icon: Wallet },
   { path: '/profile', label: '我的', icon: User },
 ];
 

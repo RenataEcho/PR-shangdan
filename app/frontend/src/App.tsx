@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import OrderDetail from './pages/OrderDetail';
 import TaskCenter from './pages/TaskCenter';
-import Wallet from './pages/Wallet';
 import WalletRecords from './pages/WalletRecords';
 import WalletAccounts from './pages/WalletAccounts';
 import Profile from './pages/Profile';
@@ -22,7 +21,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/order/:id" element={<OrderDetail />} />
           <Route path="/tasks" element={<TaskCenter />} />
-          <Route path="/wallet" element={<Wallet />} />
           <Route path="/wallet/records" element={<WalletRecords />} />
           <Route path="/wallet/accounts" element={<WalletAccounts />} />
           <Route path="/profile" element={<Profile />} />
