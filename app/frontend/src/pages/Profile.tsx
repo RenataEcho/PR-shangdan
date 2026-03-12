@@ -41,7 +41,7 @@ export default function Profile() {
   const navigate = useNavigate();
 
   const handleWithdraw = () => {
-    toast.info('提现功能开发中，敬请期待');
+    navigate('/wallet/withdraw');
   };
 
   const menuItems = [

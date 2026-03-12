@@ -7,6 +7,7 @@ import OrderDetail from './pages/OrderDetail';
 import TaskCenter from './pages/TaskCenter';
 import WalletRecords from './pages/WalletRecords';
 import WalletAccounts from './pages/WalletAccounts';
+import Withdraw from './pages/Withdraw';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/tasks" element={<TaskCenter />} />
           <Route path="/wallet/records" element={<WalletRecords />} />
           <Route path="/wallet/accounts" element={<WalletAccounts />} />
+          <Route path="/wallet/withdraw" element={<Withdraw />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
