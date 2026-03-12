@@ -77,15 +77,7 @@ export default function Profile() {
         style={{ background: 'linear-gradient(160deg, #0F1B2D 0%, #162D50 50%, #1D3557 100%)' }}
       >
         {/* Top bar */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white/80 text-sm font-medium">个人中心</h2>
-          <button
-            onClick={() => toast.info('设置功能开发中')}
-            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center"
-          >
-            <Settings className="w-4 h-4 text-white/60" />
-          </button>
-        </div>
+        
 
         {/* User Info */}
         <div className="flex items-center gap-4">
@@ -109,16 +101,14 @@ export default function Profile() {
                 已完成 <span className="text-white/70 font-medium">{userProfile.completedOrders}</span> 单
               </span>
               <span className="text-white/20">|</span>
-              <span className="text-white/40 text-[11px]">
-                入驻 <span className="text-white/70 font-medium">{userProfile.daysJoined}</span> 天
-              </span>
+              
             </div>
           </div>
         </div>
       </div>
 
       {/* Wallet Card - overlapping header */}
-      <div className="px-4 -mt-20 relative z-10">
+      <div className="px-4 relative z-10 mt-[80px] mr-[0px] mb-[0px] ml-[0px] pt-[0px] pr-[16px] pb-[0px] pl-[16px] rounded-none text-[16px] font-normal text-[#020817] bg-[#00000000] opacity-100">
         <div
           className="rounded-2xl overflow-hidden"
           style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
@@ -131,7 +121,7 @@ export default function Profile() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Wallet className="w-4 h-4 text-[#6C8CFF]" />
-                <span className="text-white/60 text-xs font-medium">我的钱包</span>
+                
               </div>
               <button
                 onClick={() => setAmountVisible(!amountVisible)}
