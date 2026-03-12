@@ -73,107 +73,109 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#F5F8FF] pb-20">
-      {/* Header Background + User Info */}
+      {/* Combined Header + Wallet: single continuous dark block */}
       <div
-        className="relative pt-12 pb-6 px-5"
-        style={{ background: 'linear-gradient(160deg, #0F1B2D 0%, #162D50 50%, #1D3557 100%)' }}
+        className="relative pb-0"
+        style={{ background: 'linear-gradient(180deg, #0F1B2D 0%, #162D50 40%, #1A3050 100%)' }}
       >
         {/* User Info */}
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2F6BFF] to-[#6C8CFF] flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-blue-500/20 ring-2 ring-white/10">
-            {userProfile.name.charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-white text-base font-bold truncate">{userProfile.name}</h1>
-              <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gradient-to-r from-[#2F6BFF]/30 to-[#6C8CFF]/30 text-[#8BABFF] border border-[#2F6BFF]/20">
-                {userProfile.level}
-              </span>
+        <div className="pt-12 px-5 pb-5">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2F6BFF] to-[#6C8CFF] flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-blue-500/20 ring-2 ring-white/10">
+              {userProfile.name.charAt(0)}
             </div>
-            <p className="text-white/40 text-xs mt-1">抖音号: {userProfile.douyinId}</p>
-            <div className="flex items-center gap-3 mt-1.5">
-              <span className="text-white/40 text-[11px]">
-                粉丝 <span className="text-white/70 font-medium">{(userProfile.followers / 10000).toFixed(1)}万</span>
-              </span>
-              <span className="text-white/20">|</span>
-              <span className="text-white/40 text-[11px]">
-                已完成 <span className="text-white/70 font-medium">{userProfile.completedOrders}</span> 单
-              </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-white text-base font-bold truncate">{userProfile.name}</h1>
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gradient-to-r from-[#2F6BFF]/30 to-[#6C8CFF]/30 text-[#8BABFF] border border-[#2F6BFF]/20">
+                  {userProfile.level}
+                </span>
+              </div>
+              <p className="text-white/40 text-xs mt-1">抖音号: {userProfile.douyinId}</p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-white/40 text-[11px]">
+                  粉丝 <span className="text-white/70 font-medium">{(userProfile.followers / 10000).toFixed(1)}万</span>
+                </span>
+                <span className="text-white/20">|</span>
+                <span className="text-white/40 text-[11px]">
+                  已完成 <span className="text-white/70 font-medium">{userProfile.completedOrders}</span> 单
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider line */}
+        <div className="mx-5 border-t border-white/[0.06]" />
+
+        {/* Wallet Balance Section - same dark background, no card separation */}
+        <div className="px-5 pt-4 pb-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-[#6C8CFF]" />
+              <span className="text-white/50 text-xs">我的钱包</span>
+            </div>
+            <button
+              onClick={() => setAmountVisible(!amountVisible)}
+              className="flex items-center gap-1 text-white/40 text-[10px] active:text-white/60 transition-colors"
+            >
+              {amountVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+
+          {/* Main Balance */}
+          <div className="mb-4">
+            <p className="text-white/40 text-[10px] mb-1">账户余额 (元)</p>
+            <div className="flex items-end gap-1">
+              <span className="text-white/50 text-lg" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>¥</span>
+              <AnimatedAmount
+                value={walletInfo.balance}
+                className="text-white text-3xl font-bold leading-none"
+                hidden={!amountVisible}
+              />
+            </div>
+          </div>
+
+          {/* Sub amounts */}
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="bg-white/[0.06] rounded-xl p-2.5">
+              <div className="flex items-center gap-1 mb-1">
+                <Clock className="w-3 h-3 text-yellow-400/70" />
+                <span className="text-white/40 text-[10px]">待结算</span>
+              </div>
+              <p className="text-white/90 text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+                {amountVisible ? `¥${walletInfo.pendingAmount.toFixed(2)}` : '****'}
+              </p>
+            </div>
+            <div className="bg-white/[0.06] rounded-xl p-2.5">
+              <div className="flex items-center gap-1 mb-1">
+                <TrendingUp className="w-3 h-3 text-[#16C784]/70" />
+                <span className="text-white/40 text-[10px]">今日收入</span>
+              </div>
+              <p className="text-[#16C784] text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+                {amountVisible ? `¥${walletInfo.todayEarned.toFixed(2)}` : '****'}
+              </p>
+            </div>
+            <div className="bg-white/[0.06] rounded-xl p-2.5">
+              <div className="flex items-center gap-1 mb-1">
+                <TrendingUp className="w-3 h-3 text-[#2F6BFF]/70" />
+                <span className="text-white/40 text-[10px]">累计收入</span>
+              </div>
+              <p className="text-white/90 text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+                {amountVisible ? `¥${walletInfo.totalEarned.toFixed(2)}` : '****'}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Wallet Card */}
-      <div className="px-4 -mt-0 relative z-10">
+      {/* Wallet Quick Actions - white bar that bridges dark area to light content */}
+      <div className="px-4 -mt-0">
         <div
-          className="rounded-2xl overflow-hidden"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+          className="bg-white rounded-2xl overflow-hidden"
+          style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)', marginTop: '-12px', position: 'relative', zIndex: 10 }}
         >
-          {/* Balance Section */}
-          <div
-            className="p-5 pb-4"
-            style={{ background: 'linear-gradient(135deg, #1A2A44 0%, #0F1B2D 100%)' }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Wallet className="w-4 h-4 text-[#6C8CFF]" />
-              </div>
-              <button
-                onClick={() => setAmountVisible(!amountVisible)}
-                className="flex items-center gap-1 text-white/40 text-[10px] active:text-white/60 transition-colors"
-              >
-                {amountVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-
-            {/* Main Balance */}
-            <div className="mb-4">
-              <p className="text-white/40 text-[10px] mb-1">账户余额 (元)</p>
-              <div className="flex items-end gap-1">
-                <span className="text-white/50 text-lg" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>¥</span>
-                <AnimatedAmount
-                  value={walletInfo.balance}
-                  className="text-white text-3xl font-bold leading-none"
-                  hidden={!amountVisible}
-                />
-              </div>
-            </div>
-
-            {/* Sub amounts */}
-            <div className="grid grid-cols-3 gap-2.5">
-              <div className="bg-white/5 rounded-xl p-2.5">
-                <div className="flex items-center gap-1 mb-1">
-                  <Clock className="w-3 h-3 text-yellow-400/70" />
-                  <span className="text-white/40 text-[10px]">待结算</span>
-                </div>
-                <p className="text-white/90 text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
-                  {amountVisible ? `¥${walletInfo.pendingAmount.toFixed(2)}` : '****'}
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-xl p-2.5">
-                <div className="flex items-center gap-1 mb-1">
-                  <TrendingUp className="w-3 h-3 text-[#16C784]/70" />
-                  <span className="text-white/40 text-[10px]">今日收入</span>
-                </div>
-                <p className="text-[#16C784] text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
-                  {amountVisible ? `¥${walletInfo.todayEarned.toFixed(2)}` : '****'}
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-xl p-2.5">
-                <div className="flex items-center gap-1 mb-1">
-                  <TrendingUp className="w-3 h-3 text-[#2F6BFF]/70" />
-                  <span className="text-white/40 text-[10px]">累计收入</span>
-                </div>
-                <p className="text-white/90 text-sm font-bold" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
-                  {amountVisible ? `¥${walletInfo.totalEarned.toFixed(2)}` : '****'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Wallet Quick Actions */}
-          <div className="bg-white grid grid-cols-3">
+          <div className="grid grid-cols-3">
             {walletActions.map((item, i) => {
               const Icon = item.icon;
               return (
