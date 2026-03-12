@@ -170,8 +170,9 @@ export const myTasks: Task[] = [
     orderTitle: '抖音短视频推广 - 记账App',
     coverImage: 'https://mgx-backend-cdn.metadl.com/generate/images/1020241/2026-03-12/c95c1516-0b7f-4a45-bdd7-6276b99b0b09.png',
     commission: '¥35',
-    currentStep: 1,
+    currentStep: 2,
     steps: [
+      { label: '报名审核', status: 'done' },
       { label: '文案审核', status: 'done' },
       { label: '视频审核', status: 'current' },
       { label: '数据确认', status: 'pending' },
@@ -194,8 +195,9 @@ export const myTasks: Task[] = [
     orderTitle: '电视剧《星河之约》宣传推广',
     coverImage: 'https://mgx-backend-cdn.metadl.com/generate/images/1020241/2026-03-12/c9dc23a6-b510-4ef2-b4c4-ca93bc2e0e40.png',
     commission: '¥200',
-    currentStep: 0,
+    currentStep: 1,
     steps: [
+      { label: '报名审核', status: 'done' },
       { label: '文案审核', status: 'current' },
       { label: '视频审核', status: 'pending' },
       { label: '数据确认', status: 'pending' },
