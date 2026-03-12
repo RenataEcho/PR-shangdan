@@ -10,7 +10,6 @@ import {
   ClipboardList,
   Search,
   X,
-  Filter,
   CheckCircle2,
   Clock,
   Circle,
@@ -18,23 +17,6 @@ import {
 import BottomNav from '@/components/BottomNav';
 import { myTasks } from '@/lib/mockData';
 import type { Task } from '@/lib/mockData';
-
-type FilterType = 'all' | 'in_progress' | 'reviewing' | 'completed';
-
-const filterOptions: { key: FilterType; label: string }[] = [
-  { key: 'all', label: '全部' },
-  { key: 'in_progress', label: '进行中' },
-  { key: 'reviewing', label: '审核中' },
-  { key: 'completed', label: '已完成' },
-];
-
-function getTaskStatus(task: Task): FilterType {
-  const currentStep = task.steps[task.currentStep];
-  if (!currentStep) return 'completed';
-  if (currentStep.label.includes('审核')) return 'reviewing';
-  if (task.steps.every((s) => s.status === 'done')) return 'completed';
-  return 'in_progress';
-}
 
 function getStepIcon(status: 'done' | 'current' | 'pending') {
   if (status === 'done') return <CheckCircle2 className="w-3.5 h-3.5 text-[#16C784]" />;
@@ -378,35 +360,31 @@ function TaskDetail({ task, onBack }: { task: Task; onBack: () => void }) {
 export default function TaskCenter() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
   const filteredTasks = useMemo(() => {
     return myTasks.filter((task) => {
-      // Search filter
       const q = searchQuery.toLowerCase();
-      const matchesSearch =
+      return (
         !q ||
         task.orderTitle.toLowerCase().includes(q) ||
         task.orderId.toLowerCase().includes(q) ||
-        task.commission.includes(q);
-
-      // Status filter
-      const status = getTaskStatus(task);
-      const matchesFilter = activeFilter === 'all' || status === activeFilter;
-
-      return matchesSearch && matchesFilter;
+        task.commission.includes(q)
+      );
     });
-  }, [searchQuery, activeFilter]);
+  }, [searchQuery]);
 
   const taskStats = useMemo(() => {
     const total = myTasks.length;
-    const inProgress = myTasks.filter((t) => getTaskStatus(t) === 'in_progress').length;
-    const reviewing = myTasks.filter((t) => getTaskStatus(t) === 'reviewing').length;
+    const inProgress = myTasks.filter((t) => {
+      const step = t.steps[t.currentStep];
+      return step && step.status === 'current';
+    }).length;
+    const finished = myTasks.filter((t) => t.steps.every((s) => s.status === 'done')).length;
     const totalCommission = myTasks.reduce((sum, t) => {
       const num = parseFloat(t.commission.replace(/[^0-9.]/g, ''));
       return sum + (isNaN(num) ? 0 : num);
     }, 0);
-    return { total, inProgress, reviewing, totalCommission };
+    return { total, inProgress, finished, totalCommission };
   }, []);
 
   if (selectedTask) {
@@ -453,9 +431,9 @@ export default function TaskCenter() {
               className="text-[#FFB020] font-bold text-base"
               style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}
             >
-              {taskStats.reviewing}
+              {taskStats.finished}
             </p>
-            <p className="text-white/40 text-[10px] mt-0.5">审核中</p>
+            <p className="text-white/40 text-[10px] mt-0.5">已结束</p>
           </div>
           <div className="bg-white/10 rounded-xl px-3 py-2.5 text-center">
             <p
@@ -490,29 +468,6 @@ export default function TaskCenter() {
             </button>
           )}
         </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="px-4 mt-3 flex items-center gap-2">
-        <Filter className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-        {filterOptions.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => setActiveFilter(opt.key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeFilter === opt.key
-                ? 'text-white'
-                : 'bg-white text-gray-500 border border-[#E6EAF2]'
-            }`}
-            style={
-              activeFilter === opt.key
-                ? { background: 'linear-gradient(135deg, #2F6BFF 0%, #6C8CFF 100%)' }
-                : {}
-            }
-          >
-            {opt.label}
-          </button>
-        ))}
       </div>
 
       {/* Task List */}
