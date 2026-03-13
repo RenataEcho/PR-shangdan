@@ -16,6 +16,7 @@ import {
   Clock,
   ArrowDownToLine,
   MonitorSmartphone,
+  Edit3,
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { userProfile, walletInfo } from '@/lib/mockData';
@@ -53,6 +54,8 @@ export default function Profile() {
   const navigate = useNavigate();
   const [amountVisible, setAmountVisible] = useState(true);
 
+  const unreadCount = 3; // Mock unread notification count
+
   const handleWithdraw = () => {
     navigate('/wallet/withdraw');
   };
@@ -65,10 +68,10 @@ export default function Profile() {
 
   const menuItems = [
     { icon: MonitorSmartphone, label: '媒体账号', desc: '管理绑定的媒体账号', color: 'text-[#2F6BFF]', bgColor: 'bg-[#2F6BFF]/10', path: '/media-accounts' },
-    { icon: Bell, label: '消息通知', desc: '系统消息和通知', color: 'text-[#6C8CFF]', bgColor: 'bg-[#6C8CFF]/10' },
-    { icon: Shield, label: '账号安全', desc: '密码和绑定设置', color: 'text-[#16C784]', bgColor: 'bg-[#16C784]/10' },
-    { icon: HelpCircle, label: '帮助中心', desc: '常见问题解答', color: 'text-purple-500', bgColor: 'bg-purple-50' },
-    { icon: Settings, label: '设置', desc: '通用设置', color: 'text-gray-500', bgColor: 'bg-gray-100' },
+    { icon: Bell, label: '消息通知', desc: '系统消息和通知', color: 'text-[#6C8CFF]', bgColor: 'bg-[#6C8CFF]/10', path: '/notifications', badge: unreadCount },
+    { icon: Shield, label: '账号安全', desc: '密码和绑定设置', color: 'text-[#16C784]', bgColor: 'bg-[#16C784]/10', path: '/account-security' },
+    { icon: HelpCircle, label: '帮助中心', desc: '常见问题解答', color: 'text-purple-500', bgColor: 'bg-purple-50', path: '/help-center' },
+    { icon: Settings, label: '设置', desc: '通用设置', color: 'text-gray-500', bgColor: 'bg-gray-100', path: '/settings' },
   ];
 
   return (
@@ -81,9 +84,18 @@ export default function Profile() {
         {/* User Info */}
         <div className="pt-12 px-5 pb-5">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2F6BFF] to-[#6C8CFF] flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-blue-500/20 ring-2 ring-white/10">
-              {userProfile.name.charAt(0)}
-            </div>
+            {/* Avatar - clickable to edit profile */}
+            <button
+              onClick={() => navigate('/profile/edit')}
+              className="relative shrink-0 active:scale-95 transition-transform"
+            >
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2F6BFF] to-[#6C8CFF] flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-blue-500/20 ring-2 ring-white/10">
+                {userProfile.name.charAt(0)}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#2F6BFF] flex items-center justify-center border-2 border-[#0F1B2D]">
+                <Edit3 className="w-2.5 h-2.5 text-white" />
+              </div>
+            </button>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="text-white text-base font-bold truncate">{userProfile.name}</h1>
@@ -108,7 +120,7 @@ export default function Profile() {
         {/* Divider line */}
         <div className="mx-5 border-t border-white/[0.06]" />
 
-        {/* Wallet Balance Section - same dark background, no card separation */}
+        {/* Wallet Balance Section */}
         <div className="px-5 pt-4 pb-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -169,7 +181,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Wallet Quick Actions - white bar that bridges dark area to light content */}
+      {/* Wallet Quick Actions */}
       <div className="px-4 -mt-0">
         <div
           className="bg-white rounded-2xl overflow-hidden"
@@ -208,7 +220,7 @@ export default function Profile() {
             return (
               <button
                 key={i}
-                onClick={() => (item as any).path ? navigate((item as any).path) : toast.info(`${item.label}功能开发中`)}
+                onClick={() => navigate(item.path)}
                 className={`w-full flex items-center justify-between px-4 py-3.5 text-left active:bg-[#F5F8FF] transition-colors ${
                   i < menuItems.length - 1 ? 'border-b border-[#F0F2F5]' : ''
                 }`}
@@ -222,7 +234,14 @@ export default function Profile() {
                     <p className="text-[10px] text-gray-400">{item.desc}</p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-300" />
+                <div className="flex items-center gap-2">
+                  {item.badge && item.badge > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold min-w-[18px] text-center">
+                      {item.badge}
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </div>
               </button>
             );
           })}
