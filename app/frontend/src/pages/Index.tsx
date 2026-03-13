@@ -22,7 +22,7 @@ function AnimatedNumber({ value, prefix = '' }: { value: number; prefix?: string
   }, [value]);
 
   return (
-    <span ref={ref} style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+    <span className="mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[0px] pr-[0px] pb-[0px] pl-[0px] rounded-none text-[18px] font-bold text-center text-[#16C784] bg-[#00000000] opacity-100" ref={ref} style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
       {prefix}{display.toLocaleString()}
     </span>
   );
@@ -189,7 +189,7 @@ export default function Index() {
           <div className="text-center">
             <p className="text-lg font-bold text-[#16C784]">
               <AnimatedNumber value={Math.floor(platformStats.totalCommission / 10000)} prefix="¥" />
-              <span className="text-xs font-normal text-gray-400">万</span>
+              <span className="mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[0px] pr-[0px] pb-[0px] pl-[0px] rounded-none text-[12px] font-normal text-center text-[#9CA3AF] bg-[#00000000] opacity-100">               </span>
             </p>
             <p className="text-[10px] text-gray-400 mt-0.5">累计佣金</p>
           </div>
