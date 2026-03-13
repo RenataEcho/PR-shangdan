@@ -1,0 +1,58 @@
+{
+    "title": "media_accounts",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer",
+            "description": "Primary key, auto-increment"
+        },
+        "user_id": {
+            "type": "string",
+            "description": "User ID"
+        },
+        "platform": {
+            "type": "string",
+            "description": "Platform name, e.g. 抖音, 快手, 小红书, B站"
+        },
+        "nickname": {
+            "type": "string",
+            "description": "Account nickname on the platform"
+        },
+        "account_id": {
+            "type": "string",
+            "description": "Account ID on the platform"
+        },
+        "followers": {
+            "type": "integer",
+            "description": "Number of followers"
+        },
+        "homepage_url": {
+            "type": "string",
+            "description": "Homepage URL of the account"
+        },
+        "avatar_url": {
+            "type": "string",
+            "description": "Avatar URL of the account",
+            "default": ""
+        },
+        "status": {
+            "type": "string",
+            "description": "Binding status: active or inactive",
+            "default": "active"
+        },
+        "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Binding time"
+        }
+    },
+    "required": [
+        "id",
+        "user_id",
+        "platform",
+        "nickname",
+        "account_id",
+        "followers",
+        "homepage_url"
+    ]
+}

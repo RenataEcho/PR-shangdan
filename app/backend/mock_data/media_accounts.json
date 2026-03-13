@@ -1,0 +1,35 @@
+[
+    {
+        "user_id": "mock_user_1",
+        "platform": "抖音",
+        "nickname": "创作者小明",
+        "account_id": "xiaoming_2026",
+        "followers": 12500,
+        "homepage_url": "https://www.douyin.com/user/xiaoming_2026",
+        "avatar_url": "",
+        "status": "active",
+        "created_at": "2025-09-15 10:30:00"
+    },
+    {
+        "user_id": "mock_user_1",
+        "platform": "快手",
+        "nickname": "小明爱创作",
+        "account_id": "kuaishou_xiaoming",
+        "followers": 8600,
+        "homepage_url": "https://www.kuaishou.com/profile/kuaishou_xiaoming",
+        "avatar_url": "",
+        "status": "active",
+        "created_at": "2025-11-20 14:00:00"
+    },
+    {
+        "user_id": "mock_user_1",
+        "platform": "小红书",
+        "nickname": "明明的日常",
+        "account_id": "xhs_mingming",
+        "followers": 5200,
+        "homepage_url": "https://www.xiaohongshu.com/user/xhs_mingming",
+        "avatar_url": "",
+        "status": "active",
+        "created_at": "2026-01-08 09:15:00"
+    }
+]

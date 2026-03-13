@@ -64,7 +64,7 @@ export default function Profile() {
   ];
 
   const menuItems = [
-    { icon: MonitorSmartphone, label: '媒体账号', desc: '管理绑定的媒体账号', color: 'text-[#2F6BFF]', bgColor: 'bg-[#2F6BFF]/10' },
+    { icon: MonitorSmartphone, label: '媒体账号', desc: '管理绑定的媒体账号', color: 'text-[#2F6BFF]', bgColor: 'bg-[#2F6BFF]/10', path: '/media-accounts' },
     { icon: Bell, label: '消息通知', desc: '系统消息和通知', color: 'text-[#6C8CFF]', bgColor: 'bg-[#6C8CFF]/10' },
     { icon: Shield, label: '账号安全', desc: '密码和绑定设置', color: 'text-[#16C784]', bgColor: 'bg-[#16C784]/10' },
     { icon: HelpCircle, label: '帮助中心', desc: '常见问题解答', color: 'text-purple-500', bgColor: 'bg-purple-50' },
@@ -208,7 +208,7 @@ export default function Profile() {
             return (
               <button
                 key={i}
-                onClick={() => toast.info(`${item.label}功能开发中`)}
+                onClick={() => (item as any).path ? navigate((item as any).path) : toast.info(`${item.label}功能开发中`)}
                 className={`w-full flex items-center justify-between px-4 py-3.5 text-left active:bg-[#F5F8FF] transition-colors ${
                   i < menuItems.length - 1 ? 'border-b border-[#F0F2F5]' : ''
                 }`}

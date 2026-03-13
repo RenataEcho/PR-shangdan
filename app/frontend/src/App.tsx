@@ -9,6 +9,8 @@ import WalletRecords from './pages/WalletRecords';
 import WalletAccounts from './pages/WalletAccounts';
 import Withdraw from './pages/Withdraw';
 import Profile from './pages/Profile';
+import MediaAccounts from './pages/MediaAccounts';
+import AuthCallback from './pages/AuthCallback';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
           <Route path="/wallet/accounts" element={<WalletAccounts />} />
           <Route path="/wallet/withdraw" element={<Withdraw />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/media-accounts" element={<MediaAccounts />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
