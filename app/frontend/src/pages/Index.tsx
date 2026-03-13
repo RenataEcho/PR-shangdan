@@ -188,8 +188,10 @@ export default function Index() {
           </div>
           <div className="text-center">
             <p className="text-lg font-bold text-[#16C784]">
-              <AnimatedNumber value={Math.floor(platformStats.totalCommission / 10000)} prefix="¥" />
-              <span className="mt-[0px] mr-[0px] mb-[0px] ml-[0px] pt-[0px] pr-[0px] pb-[0px] pl-[0px] rounded-none text-[12px] font-normal text-center text-[#9CA3AF] bg-[#00000000] opacity-100">               </span>
+              <span className="text-[18px] font-bold text-[#16C784]" style={{ fontFamily: '"DIN Alternate", "DIN", system-ui' }}>
+                ¥{(platformStats.totalCommission / 10000).toFixed(2)}
+              </span>
+              <span className="text-[12px] font-normal text-[#9CA3AF] ml-0.5">W</span>
             </p>
             <p className="text-[10px] text-gray-400 mt-0.5">累计佣金</p>
           </div>
