@@ -85,7 +85,7 @@ export default function OrderCard({ order }: OrderCardProps) {
               }}
               className="px-3 py-1.5 bg-[#2F6BFF] text-white text-xs font-medium rounded-lg active:scale-95 transition-transform"
             >
-              立即接单
+              立即报名
             </button>
           </div>
         </div>

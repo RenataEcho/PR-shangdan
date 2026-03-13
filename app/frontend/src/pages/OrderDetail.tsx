@@ -27,7 +27,7 @@ export default function OrderDetail() {
 
   const handleEnroll = () => {
     setEnrolled(true);
-    toast.success('接单成功！请前往任务中心查看', { duration: 2000 });
+    toast.success('报名成功！请前往任务中心查看', { duration: 2000 });
   };
 
   const renderPrice = () => {
@@ -166,7 +166,7 @@ export default function OrderDetail() {
           }`}
           style={!enrolled ? { background: 'linear-gradient(135deg, #2F6BFF 0%, #6C8CFF 100%)', boxShadow: '0 4px 16px rgba(47,107,255,0.3)' } : {}}
         >
-          {enrolled ? '已接单' : '立即接单'}
+          {enrolled ? '已报名' : '立即报名'}
         </button>
       </div>
     </div>
