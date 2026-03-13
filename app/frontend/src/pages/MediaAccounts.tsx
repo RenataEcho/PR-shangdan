@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, ExternalLink, Users, Link2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, ExternalLink, Users, Link2, Pencil } from 'lucide-react';
 import { createClient } from '@metagptx/web-sdk';
 import { toast } from 'sonner';
 
@@ -42,12 +42,22 @@ export default function MediaAccounts() {
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<MediaAccount | null>(null);
   const [showUnbindConfirm, setShowUnbindConfirm] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form state
+  // Add form state
   const [form, setForm] = useState({
     platform: '抖音',
+    nickname: '',
+    account_id: '',
+    followers: '',
+    homepage_url: '',
+  });
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
     nickname: '',
     account_id: '',
     followers: '',
@@ -116,6 +126,53 @@ export default function MediaAccounts() {
       fetchAccounts();
     } catch {
       toast.error('绑定失败，请先登录');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleOpenEdit = (account: MediaAccount) => {
+    setEditingAccount(account);
+    setEditForm({
+      nickname: account.nickname,
+      account_id: account.account_id,
+      followers: String(account.followers),
+      homepage_url: account.homepage_url,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEdit = async () => {
+    if (!isLoggedIn) {
+      toast.error('请先登录后再编辑');
+      return;
+    }
+    if (!editingAccount) return;
+    if (!editForm.nickname.trim() || !editForm.account_id.trim()) {
+      toast.error('请填写账号昵称和账号ID');
+      return;
+    }
+    if (!editForm.homepage_url.trim()) {
+      toast.error('请填写主页链接');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await client.entities.media_accounts.update({
+        id: String(editingAccount.id),
+        data: {
+          nickname: editForm.nickname.trim(),
+          account_id: editForm.account_id.trim(),
+          followers: parseInt(editForm.followers) || 0,
+          homepage_url: editForm.homepage_url.trim(),
+        },
+      });
+      toast.success('账号信息已更新');
+      setShowEditModal(false);
+      setEditingAccount(null);
+      fetchAccounts();
+    } catch {
+      toast.error('更新失败');
     } finally {
       setSubmitting(false);
     }
@@ -210,8 +267,9 @@ export default function MediaAccounts() {
               return (
                 <div
                   key={account.id}
-                  className="bg-white rounded-2xl overflow-hidden"
+                  className="bg-white rounded-2xl overflow-hidden active:bg-gray-50/50 transition-colors cursor-pointer"
                   style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}
+                  onClick={() => handleOpenEdit(account)}
                 >
                   {/* Card header with platform badge */}
                   <div className="px-4 pt-4 pb-3">
@@ -236,12 +294,20 @@ export default function MediaAccounts() {
                           <p className="text-xs text-gray-400 mt-0.5">ID: {account.account_id}</p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setShowUnbindConfirm(account.id)}
-                        className="p-2 rounded-lg text-gray-300 active:text-red-400 active:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(account); }}
+                          className="p-2 rounded-lg text-gray-300 active:text-[#2F6BFF] active:bg-blue-50 transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowUnbindConfirm(account.id); }}
+                          className="p-2 rounded-lg text-gray-300 active:text-red-400 active:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -255,15 +321,19 @@ export default function MediaAccounts() {
                           {formatFollowers(account.followers)}
                         </span>
                       </div>
-                      <a
-                        href={account.homepage_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-[#2F6BFF] text-xs font-medium active:opacity-70"
-                      >
-                        主页
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <div className="flex items-center gap-3">
+                        <a
+                          href={account.homepage_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 text-[#2F6BFF] text-xs font-medium active:opacity-70"
+                        >
+                          主页
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <span className="text-[10px] text-gray-300">点击编辑</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -378,6 +448,91 @@ export default function MediaAccounts() {
                 className="w-full py-3.5 bg-[#2F6BFF] text-white text-sm font-bold rounded-xl active:bg-[#2558CC] disabled:opacity-50 transition-colors mt-2"
               >
                 {submitting ? '绑定中...' : '确认绑定'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Account Modal */}
+      {showEditModal && editingAccount && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => { setShowEditModal(false); setEditingAccount(null); }} />
+          <div className="relative w-full bg-white rounded-t-3xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-[#0F1B2D]">编辑账号</h2>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                  style={{
+                    backgroundColor: getPlatformInfo(editingAccount.platform).bgColor,
+                    color: getPlatformInfo(editingAccount.platform).color,
+                  }}
+                >
+                  {editingAccount.platform}
+                </span>
+              </div>
+              <button onClick={() => { setShowEditModal(false); setEditingAccount(null); }} className="text-gray-400 text-sm">
+                取消
+              </button>
+            </div>
+
+            <div className="px-5 pb-8 space-y-4">
+              {/* Nickname */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">账号昵称</label>
+                <input
+                  type="text"
+                  value={editForm.nickname}
+                  onChange={(e) => setEditForm({ ...editForm, nickname: e.target.value })}
+                  placeholder="请输入账号昵称"
+                  className="w-full px-4 py-3 bg-[#F5F8FF] rounded-xl text-sm text-[#0F1B2D] placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 transition-all"
+                />
+              </div>
+
+              {/* Account ID */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">账号ID</label>
+                <input
+                  type="text"
+                  value={editForm.account_id}
+                  onChange={(e) => setEditForm({ ...editForm, account_id: e.target.value })}
+                  placeholder="请输入平台账号ID"
+                  className="w-full px-4 py-3 bg-[#F5F8FF] rounded-xl text-sm text-[#0F1B2D] placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 transition-all"
+                />
+              </div>
+
+              {/* Followers */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">粉丝数量</label>
+                <input
+                  type="number"
+                  value={editForm.followers}
+                  onChange={(e) => setEditForm({ ...editForm, followers: e.target.value })}
+                  placeholder="请输入粉丝数量"
+                  className="w-full px-4 py-3 bg-[#F5F8FF] rounded-xl text-sm text-[#0F1B2D] placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 transition-all"
+                />
+              </div>
+
+              {/* Homepage URL */}
+              <div>
+                <label className="text-xs text-gray-500 mb-1.5 block">主页链接</label>
+                <input
+                  type="url"
+                  value={editForm.homepage_url}
+                  onChange={(e) => setEditForm({ ...editForm, homepage_url: e.target.value })}
+                  placeholder="请输入账号主页链接"
+                  className="w-full px-4 py-3 bg-[#F5F8FF] rounded-xl text-sm text-[#0F1B2D] placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 transition-all"
+                />
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={handleEdit}
+                disabled={submitting}
+                className="w-full py-3.5 bg-[#2F6BFF] text-white text-sm font-bold rounded-xl active:bg-[#2558CC] disabled:opacity-50 transition-colors mt-2"
+              >
+                {submitting ? '保存中...' : '保存修改'}
               </button>
             </div>
           </div>
